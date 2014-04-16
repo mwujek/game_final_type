@@ -23,8 +23,6 @@ import org.jbox2d.dynamics.contacts.*;
 
 
 
-
-
 Box2DProcessing box2d; 
 
 ArrayList<Boundary> boundaries;
@@ -33,7 +31,9 @@ ArrayList<Boundary> boundaries;
 //score, lives, and text stuff
 PFont apercu;
 
-int score=100;
+float score=100;
+String scoreValue;
+
 int amtLives = 5;
 String lives="lives: ";
 String scoreString="score: ";
@@ -43,7 +43,7 @@ String yourScore = "Your score is: ";
 boolean addScoreTime = true;
 float counter = 0;
 float counterLife = 0;
-float counterSpeed= 5;
+float counterSpeed= 6;
 
 
 
@@ -58,13 +58,15 @@ boolean levelComplete = false;
 float filling;
 float speed = 5;
 boolean goingDown;
+boolean down;
+float opacity = 0;
 PImage keyIcon;
 
 
 //gate
 
 float gateX = width-2;
-float gateY = 200;
+float gateY = -200;
 
 
 float x, y, thrust, inverseDrag, velocityX, velocityY, angle, torque;
@@ -85,6 +87,8 @@ float creationRate = 0.0f;
 
 int bonus;
 
+float backgroundColor = 255;
+
 void setup() {
   keyIcon = loadImage("key.png");
   apercu = loadFont("Apercu-Bold-48.vlw");
@@ -92,13 +96,14 @@ void setup() {
 
 
   size(600, 600);
-  xPosKey = random(width);
-  yPosKey = random(0, height/2);
+  xPosKey = random(0, width/1.5);
+  yPosKey = random(height/3, height);
   oscP5 = new OscP5(this, 8000); //new OSC object 
+
   x = 50;
-  y = 50;
-  thrust = 0.12;
-  inverseDrag = 0.99;
+  y = 200;
+  thrust = 0.20;
+  inverseDrag = 0.95;
   velocityX = 0;
   velocityY = 0;
   angle = 0.0;
@@ -110,7 +115,7 @@ void setup() {
   box2d.setGravity(0, 0);
 
   for (int i = 0; i < circles.length; i++) {
-    circles[i] = new Circle((width/2+100), random(height-50), 50, radiusDifference, restitutionValue, margin,int(random(50,100)), int(random(-50,-200)));
+    circles[i] = new Circle((width/2+100), random(height-50), 50, radiusDifference, restitutionValue, margin, int(random(50, 100)), int(random(-50, -200)));
   }
 
 
@@ -122,19 +127,42 @@ void setup() {
   boundaries.add(new Boundary(5, height/2, 10, height));
 }
 
-void draw() {
-  background(60);
-  
 
+void draw() {
+  String scorez = nf(score, 4, 4);
+  x = constrain(x, 10, width-10);
+  y = constrain(y, 10, height-10);
+
+
+  scoreValue =(String.format("%.1f", score));
+  //flux opacity
+  if (down) {
+    opacity -=speed;
+  } 
+  else {
+    opacity +=speed;
+  }
+  if (opacity > 255) {
+    down = true;
+  } 
+  if (opacity<50) {
+    down = false;
+  }
+
+  background(backgroundColor);
 
   box2d.step();   
   //looks for distance from key
-  fill(255);
-  image(keyIcon,xPosKey,yPosKey);
+  fill(backgroundColor, opacity);
+  println(filling);
+  rect(xPosKey, yPosKey, 50, 50);
+
   //ellipse(xPosKey, yPosKey, 30, 30);
   distFromKey = dist(x, y, xPosKey, yPosKey);
   if (distFromKey<30) {
     keyFound = true;
+    addscore(50);
+
     xPosKey = -100;
     yPosKey = -100;
     gateY= height-100;
@@ -177,22 +205,23 @@ void draw() {
   translate(x, y);
   rotate(angle);
   noStroke();
-  fill(100);
-  ellipse(0, 0, 35, 25);
-  fill(#ffcc00);
+  //  Testing ellipse for ship!
+  //  fill(100);
+  //  ellipse(0, 0, 35, 25);
+  fill(#EA4B11);
   triangle(-10, -10, 15, 0, -10, 10);
   popMatrix();  
 
   showScore();
 
   //circles!!
-  
+
   for (int i = 0; i < circles.length; i++) {
     // Look, this is just like what we had before!
     circles[i].display();
-    if (frameCount%500==0){
-    circles[i].energy();
-    println("refresh");
+    if (frameCount%500==0) {
+      circles[i].energy();
+      println("refresh");
     }
     if (circles[i].collided()) {
       fill(#1BAA85);
@@ -220,7 +249,7 @@ void draw() {
       goingDown = false;
     }
 
-    fill(100, 255, filling);
+    fill(0, 255, filling);
     rectMode(CENTER);
     rect(gateX, gateY, 20, 50);
   }
@@ -231,15 +260,18 @@ void draw() {
   if (distFromGate < 20) {
     levelComplete = true;
   }
-  if (levelComplete == true){
-  levelCompleted();
-  addBonus();
-   score= score+bonus;
+  if (levelComplete == true) {
+    levelCompleted();
+    addBonus();
+    score= score+bonus;
   }
-  
-    //Is there more than 1 life?
-  if(amtLives < 1){
-  gameOver();}
+
+  //Is there more than 1 life?
+  if (amtLives < 1) {
+    gameOver();
+  }
+  tint(255, opacity);  // Display at half opacity
+  image(keyIcon, xPosKey, yPosKey);
 }
 
 void levelCompleted() {
@@ -248,7 +280,7 @@ void levelCompleted() {
   background(0);
   fill(#ffcc00);
   textSize(28);
-  text(levelEnd + yourScore +score, 50, height/2);
+  text(levelEnd + yourScore +scoreValue, 50, height/2);
 }
 
 
@@ -276,15 +308,14 @@ void keyReleased() {
 void showScore() {
   fill(0);
   textSize(28);
-  text(scoreString + score, 10, 30);
+  text(scoreString + scoreValue, 10, 30);
   text(lives + amtLives, 10, 60);
 
   if (addScoreTime) {
-    if(frameCount % 60 == 0){
-    score-=1;
-    
+    if (frameCount % 3 == 0) {
+      score-=0.1;
+    }
   }
-}
 }
 
 void restart() {
@@ -293,19 +324,31 @@ void restart() {
   y=5;
   velocityX = 0;
   velocityY = 0;
-  if(addScoreTime){
-  amtLives-=1;
-  score= score-20;
-
-  
+  if (addScoreTime) {
+    amtLives-=1;
+    addscore(-30);
   }
 }
-  void addBonus(){
-    counter+=counterSpeed;
-    if (counter<500){
+void addBonus() {
+  counter+=counterSpeed;
+  if (counter<500) {
     score+=counterSpeed;
-    }
   }
+}
+
+void drawCoin(int x, int y) {
+}
+
+
+void addscore (float scoreValue) {
+
+  score += scoreValue;
+  flashValue();
+}
+
+void flashValue(){
+  text(scoreValue,50,60);
+}
 
 //  void minusLifeScore(){
 //  counterLife+=counterSpeed;
@@ -313,3 +356,4 @@ void restart() {
 //    score-=counterSpeed;
 //    }
 //  }
+

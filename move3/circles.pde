@@ -62,7 +62,7 @@ class Circle {
     translate(pos.x, pos.y);    // Using the Vec2 position and float angle to
     noStroke();
     //image(img, 0, 0);
-    fill(red, green, blue, opacity); //blue
+    fill(0, 150, 255, opacity); //blue
 
     ellipseMode(CENTER);
     ellipse(0, 0, r, r);

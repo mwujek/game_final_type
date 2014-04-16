@@ -38,7 +38,7 @@ class Circle {
     fd.shape = cs;
     // Parameters that affect physics
     fd.density = 5.0;
-    fd.friction = 1.0;
+    fd.friction = 0.0;
     fd.restitution = 0.45;
     
     
@@ -99,9 +99,9 @@ class Circle {
     return false;
   }
   
-    void change() {
-      println("FUUUCK");
-  }
+//    void change() {
+//      println("bleh");
+//  }
   //returns value for collision
   boolean collided(){
     Vec2 pos = box2d.getBodyPixelCoord(body);

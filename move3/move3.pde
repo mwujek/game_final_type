@@ -89,6 +89,11 @@ int bonus;
 
 float backgroundColor = 255;
 
+//Easing Trail
+int num = 20;
+float mx[] = new float[num];
+float my[] = new float[num];
+
 void setup() {
   keyIcon = loadImage("key.png");
   apercu = loadFont("Apercu-Bold-48.vlw");
@@ -103,7 +108,7 @@ void setup() {
   x = 50;
   y = 200;
   thrust = 0.20;
-  inverseDrag = 0.95;
+  inverseDrag = 0.97;
   velocityX = 0;
   velocityY = 0;
   angle = 0.0;
@@ -115,7 +120,7 @@ void setup() {
   box2d.setGravity(0, 0);
 
   for (int i = 0; i < circles.length; i++) {
-    circles[i] = new Circle((width/2+100), random(height-50), 50, radiusDifference, restitutionValue, margin, int(random(50, 100)), int(random(-50, -200)));
+    circles[i] = new Circle((width/2+100), random(height-50), 50, radiusDifference, 4, margin, int(random(50, 100)), int(random(-50, -200)));
   }
 
 
@@ -129,9 +134,26 @@ void setup() {
 
 
 void draw() {
+    background(backgroundColor);
+
   String scorez = nf(score, 4, 4);
   x = constrain(x, 10, width-10);
   y = constrain(y, 10, height-10);
+  
+  
+  //easing trail
+  // Cycle through the array, using a different entry on each frame. 
+  // Using modulo (%) like this is faster than moving all the values over.
+//  int which = frameCount % num;
+//  mx[which] = x;
+//  my[which] = y;
+//  for (int i = 0; i < num; i++) {
+//    // which+1 is the smallest (the oldest in the array)
+//    int index = (which+1 + i) % num;
+//      fill(#EA4B11);
+//
+//    ellipse(mx[index], my[index], i, i);
+//  }
 
 
   scoreValue =(String.format("%.1f", score));
@@ -149,7 +171,6 @@ void draw() {
     down = false;
   }
 
-  background(backgroundColor);
 
   box2d.step();   
   //looks for distance from key
@@ -336,12 +357,11 @@ void addBonus() {
   }
 }
 
-void drawCoin(int x, int y) {
+void drawCoin(int numberCoins) {
 }
 
 
 void addscore (float scoreValue) {
-
   score += scoreValue;
   flashValue();
 }

@@ -3,14 +3,16 @@ class Circle {
   //  Instead of any of the usual variables, we will store a reference to a Box2D Body
   Body body;  
   Fixture fixture;
+  float energyValue;
   PImage img;
+
   float radius;
   float w, h, r, filling, opacity;
   float scaled;
   boolean startGrowing;
   float inc = TWO_PI/25.0; //used for smoothing 'easing' on radius growth/shrinking
   float a =0.0;
-  Circle(float x, float y, float radius, float radiusDifference, float restitutionValue, float margin) {
+  Circle(float x, float y, float radius, float radiusDifference, float restitutionValue, float margin, int xPush, int yPush) {
     opacity=255;
     w = 16;
     h = 16;
@@ -36,14 +38,13 @@ class Circle {
     FixtureDef fd = new FixtureDef();
     fd.shape = cs;
     // Parameters that affect physics
-    fd.density = 0.0;
+    fd.density = 5.0;
     fd.friction = 0.0;
-    fd.restitution = 0.4;
-    bd.linearDamping = 0.0;
-bd.angularDamping = 0.0;
-    // Setting an arbitrary initial velocity
-body.setLinearVelocity(new Vec2(random(50),260));
-// Setting an arbitrary initial angular velocity
+    fd.restitution = 0.45;
+
+
+    //body.setLinearVelocity(new Vec2(0,3));
+    body.setLinearVelocity(new Vec2(xPush, yPush));
 
     // Attach Fixture to Body               
     fixture = body.createFixture(fd);
@@ -62,7 +63,7 @@ body.setLinearVelocity(new Vec2(random(50),260));
     translate(pos.x, pos.y);    // Using the Vec2 position and float angle to
     noStroke();
     //image(img, 0, 0);
-    fill(red, green, blue, opacity); //blue
+    fill(#fc0fc0, 100); //blue
 
     ellipseMode(CENTER);
     ellipse(0, 0, r, r);
@@ -70,9 +71,14 @@ body.setLinearVelocity(new Vec2(random(50),260));
     popMatrix();
   }
 
+  void energy() {
+    energyValue = random(1);
+    float energy = map(energyValue, 0, 1, -5, 5);
+    body.setLinearVelocity(new Vec2(energy, energy));
+  }
 
 
- 
+
 
   // This function removes the particle from the box2d world
   void killBody() {
@@ -93,19 +99,19 @@ body.setLinearVelocity(new Vec2(random(50),260));
     }
     return false;
   }
-  
-    void change() {
-      println("FUUUCK");
-  }
-  
-  boolean collided(){
+
+  //    void change() {
+  //      println("bleh");
+  //  }
+  //returns value for collision
+  boolean collided() {
     Vec2 pos = box2d.getBodyPixelCoord(body);
-    float distanceFromPoint = dist(x,y,pos.x, pos.y);
-    if(distanceFromPoint<(r/2)+12){
+    float distanceFromPoint = dist(x, y, pos.x, pos.y);
+    if (distanceFromPoint<(r/2)+16) {
       return true;
     }
     return false;
   }
-
+ 
 }
 

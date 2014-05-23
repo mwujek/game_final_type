@@ -3,6 +3,9 @@
 - Linear Motion via Box2D (energy is decreased on collision — might be fixed with restitution)
 
 #### to do
+
+- flash score, can't get the RETURN TO WORK!!
+
 - switch to continuous mode (add score for time!)
 - use for loop to evenly distribute intitial circles (top to bottom)
 - change collision function to allow for different sized circles!!
@@ -24,4 +27,4 @@
 
 - business card with typekit font (simple) LETTERPRESS
 - finish thesis.
-- mark monday on calendar for meeting w scott
+
